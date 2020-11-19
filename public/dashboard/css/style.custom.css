@@ -1,0 +1,19 @@
+.crud-images{
+    position: absolute;
+    right: 0;
+    margin-right: 25px;
+    margin-top: 10px;
+    border-radius: 20px;
+    padding: 0px 4px;
+}
+
+.crud-images span{
+    font-size: 21px;
+    padding: 0px;
+    line-height: 0;
+    color: #FFF;
+}
+
+textarea.form-control{
+    min-height: 320px;
+}
