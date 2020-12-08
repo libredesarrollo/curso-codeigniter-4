@@ -22,6 +22,8 @@ class CategoryAutoCRUD extends CRUDBaseController
 
         $this->setModel(new MovieModel());
 
+        $this->setRelationOneToMany('category_id', new CategoryModel(), 'id', 'title');
+
         $this->nameValidation = "movies";
 
         $this->HTMLheader = view("dashboard/templates/header", $dataHeader);

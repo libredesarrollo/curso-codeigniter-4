@@ -1,14 +1,21 @@
-<form action="" class="form-inline justify-content-center">
-    <input name="search" value="<?= $search ?>" type="text" class="form-control form-control-sm w-50 mr-2" placeholder="Buscar...">
+<form>
 
-    <select class="form-control form-control-sm w-25 mr-2" name="category_id">
-        <option value="">Sin categorías</option>
-        <?php foreach ($categories as $c) : ?>
-            <option <?= $category_id == $c->id ? "selected" : "" ?> value="<?= $c->id ?>"><?= $c->title ?></option>
-        <?php endforeach ?>
-    </select>
-
-    <button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-search"></i></button>
+    <div class="row">
+        <div class="col-md-3">
+            <input class="form-control form-control-sm w-100 mr-2" name="search" value="<?= $search ?>" type="text" placeholder="Buscar...">
+        </div>
+        <div class="col-md-6">
+            <select class="form-control form-control-sm w-100 mr-2" name="category_id">
+                <option value="">Sin categorías</option>
+                <?php foreach ($categories as $c) : ?>
+                    <option <?= $category_id == $c->id ? "selected" : "" ?> value="<?= $c->id ?>"><?= $c->title ?></option>
+                <?php endforeach ?>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary btn-sm" type="submit"><i class="fa fa-search"></i></button>
+        </div>
+    </div>
 </form>
 
 <?php foreach ($movies as $key => $m) : ?>
@@ -31,6 +38,6 @@
 
 <?php endforeach ?>
 
-<?php if($pager): ?>
-<?= $pager->links() ?>
+<?php if ($pager) : ?>
+    <?= $pager->links() ?>
 <?php endif ?>

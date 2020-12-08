@@ -6,6 +6,36 @@ use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Model;
 
+class Relation
+{
+    public $localField;
+    public $tableName;
+    public $fkField;
+    public $fkFieldName;
+
+    function __construct($localField, $tableName, $fkField, $fkFieldName)
+    {
+        $this->localField = $localField;
+        $this->tableName = $tableName;
+        $this->fkField = $fkField;
+        $this->fkFieldName = $fkFieldName;
+    }
+}
+
+class RelationData
+{
+    public $data;
+    public $fkField;
+    public $fkFieldName;
+
+    function __construct($data, $fkField, $fkFieldName)
+    {
+        $this->data = $data;
+        $this->fkField = $fkField;
+        $this->fkFieldName = $fkFieldName;
+    }
+}
+
 class CRUDBaseController extends BaseController
 {
 
@@ -16,6 +46,9 @@ class CRUDBaseController extends BaseController
 
     private $rows = [];
     private $types = [];
+
+    private $selectsFk = [];
+    private $selectsData = [];
 
 
     private $model;
@@ -80,7 +113,9 @@ class CRUDBaseController extends BaseController
         $record = $this->model->find($id);
         $validation =  \Config\Services::validation();
 
-        $this->HTMLbody = view('Custom/CRUDBaseController/edit', ['validation' => $validation, 'record' => $record, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types]);
+        $this->buildRelations();
+
+        $this->HTMLbody = view('Custom/CRUDBaseController/edit', ['validation' => $validation, 'record' => $record, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types,'selects' => $this->selectsData]);
         $this->_loadDefaultView();
     }
 
@@ -111,7 +146,10 @@ class CRUDBaseController extends BaseController
     public  function new()
     {
         $validation =  \Config\Services::validation();
-        $this->HTMLbody = view('Custom/CRUDBaseController/new', ['validation' => $validation, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types]);
+
+        $this->buildRelations();
+
+        $this->HTMLbody = view('Custom/CRUDBaseController/new', ['validation' => $validation, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types,'selects' => $this->selectsData]);
         $this->_loadDefaultView();
     }
 
@@ -130,6 +168,41 @@ class CRUDBaseController extends BaseController
         }
 
         return redirect()->back()->withInput();
+    }
+
+    public function delete($id = null){
+
+        if($this->model->find($id) == null){
+            throw PageNotFoundException::forPageNotFound();
+        }
+
+        $this->model->delete($id);
+
+        return redirect()->back()->with('message','Registro eliminado correctamente.');
+    }
+
+
+    public function setRelationOneToMany($localField, $tableName, $fkField, $fkFieldName)
+    {
+        //$relation = new Relation($localField, $tableName, $fkField, $fkFieldName);
+        //var_dump($relation);
+        array_push($this->selectsFk, new Relation($localField, $tableName, $fkField, $fkFieldName));
+    }
+
+    private function buildRelations()
+    {
+        if (!count($this->selectsFk))
+            return;
+            
+        $this->selectsData
+        [$this->selectsFk[0]->localField] = new RelationData(
+            $this->selectsFk[0]->tableName->findAll(),
+            $this->selectsFk[0]->fkField,
+            $this->selectsFk[0]->fkFieldName
+        );
+
+        //var_dump($this->selectsData);
+
     }
 
 

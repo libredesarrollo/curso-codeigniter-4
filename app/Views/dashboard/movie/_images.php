@@ -1,7 +1,7 @@
 
 <div class="row">
     <?php foreach ($images as $i): ?>
-        <div class="col-xl-4 col-md-6 .col-sm-12 mt-3">
+        <div class="col-xl-4 col-md-6 .col-sm-12 mt-3 position-relative">
 
             <a href="<?= route_to('image_delete',$i->id) ?>" class="crud-images btn btn-danger">
                 <span aria-hidden="true">&times;</span>
