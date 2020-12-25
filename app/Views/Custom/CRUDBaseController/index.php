@@ -5,7 +5,7 @@
         <tr>
             <?php foreach ($eheading as $key => $h) : ?>
                 <th>
-                    <?= $h ?>
+                    <?= $listName[$h] ?>
                 </th>
             <?php endforeach ?>
             <th>
@@ -38,6 +38,11 @@
         </tr>
     </tbody>
 </table>
+
+<?php if ($pager) : ?>
+    <?= $pager->links() ?>
+<?php endif ?>
+
 
 
 <div class="modal fade" id="deleteModal">

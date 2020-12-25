@@ -19,37 +19,39 @@
 
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="<?= base_url() ?>">Navbar</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <div class="container-fluid">
+      <a class="navbar-brand" href="<?= base_url() ?>">Navbar</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="<?= base_url() ?>">Home <span class="sr-only">(current)</span></a>
-        </li>
-        <?php if (isset($_SESSION['type'])) : ?>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= route_to('store_buyed_index') ?>">Compras</a>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="<?= base_url() ?>">Home <span class="sr-only">(current)</span></a>
           </li>
-        <?php endif ?>
-      </ul>
-      <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">
-            Usuario
-          </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="<?= base_url() ?>/logout"><i class="fa fa-close"></i> Cerrar sesión</a>
+          <?php if (isset($_SESSION['type'])) : ?>
+            <li class="nav-item">
+              <a class="nav-link" href="<?= route_to('store_buyed_index') ?>">Compras</a>
+            </li>
+          <?php endif ?>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown">
+              Usuario
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="<?= base_url() ?>/logout"><i class="fa fa-close"></i> Cerrar sesión</a>
 
-            <form action="<?= base_url() ?>/logout" method="POST" class="dropdown-item">
-              <button class="btn btn-link" type="submit"><i class="fa fa-close"></i> Cerrar sesión</button>
-            </form>
+              <form action="<?= base_url() ?>/logout" method="POST" class="dropdown-item">
+                <button class="btn btn-link" type="submit"><i class="fa fa-close"></i> Cerrar sesión</button>
+              </form>
 
-          </div>
-        </li>
-      </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 

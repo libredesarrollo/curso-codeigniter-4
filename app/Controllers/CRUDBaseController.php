@@ -50,7 +50,6 @@ class CRUDBaseController extends BaseController
     private $selectsFk = [];
     private $selectsData = [];
 
-
     private $model;
 
     private $HTMLbody;
@@ -59,6 +58,8 @@ class CRUDBaseController extends BaseController
 
     public $nameValidation = "";
 
+    public $paginated = false;
+    public $listName = [];
 
     public function setQuery($query)
     {
@@ -78,6 +79,10 @@ class CRUDBaseController extends BaseController
     private function _setFromDBResult()
     {
         $this->rows = $this->query->getResultArray();
+
+        if ($this->paginated)
+            $this->rows = $this->model->paginate(10);
+
         $this->eheading = $this->iheading = $this->query->getFieldNames();
 
         $types = $this->query->getFieldData();
@@ -102,20 +107,22 @@ class CRUDBaseController extends BaseController
 
         //echo $this->request->getServer('REQUEST_URI');
         //echo $this->request->getServer('HTTP_REFERER');
+        $this->_validateListName();
 
         $baseURL = $this->request->getServer('REQUEST_URI');
-        $this->HTMLbody = view('Custom/CRUDBaseController/index', ['rows' => $this->rows, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' =>  $this->_getSegmentURL()]);
+        $this->HTMLbody = view('Custom/CRUDBaseController/index', ['rows' => $this->rows, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' =>  $this->_getSegmentURL(), 'pager' => $this->model->pager,'listName' => $this->listName]);
         $this->_loadDefaultView();
     }
 
     public  function edit($id)
     {
+        $this->_validateListName();
         $record = $this->model->find($id);
         $validation =  \Config\Services::validation();
 
         $this->buildRelations();
 
-        $this->HTMLbody = view('Custom/CRUDBaseController/edit', ['validation' => $validation, 'record' => $record, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types,'selects' => $this->selectsData]);
+        $this->HTMLbody = view('Custom/CRUDBaseController/edit', ['validation' => $validation, 'record' => $record, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types, 'selects' => $this->selectsData,'listName' => $this->listName]);
         $this->_loadDefaultView();
     }
 
@@ -145,11 +152,12 @@ class CRUDBaseController extends BaseController
 
     public  function new()
     {
+        $this->_validateListName();
         $validation =  \Config\Services::validation();
 
         $this->buildRelations();
 
-        $this->HTMLbody = view('Custom/CRUDBaseController/new', ['validation' => $validation, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types,'selects' => $this->selectsData]);
+        $this->HTMLbody = view('Custom/CRUDBaseController/new', ['validation' => $validation, 'eheading' => $this->eheading, 'iheading' => $this->iheading, 'primaryId' => $this->primaryId, 'baseURL' => $this->_getSegmentURL(), 'types' => $this->types, 'selects' => $this->selectsData,'listName' => $this->listName]);
         $this->_loadDefaultView();
     }
 
@@ -170,15 +178,16 @@ class CRUDBaseController extends BaseController
         return redirect()->back()->withInput();
     }
 
-    public function delete($id = null){
+    public function delete($id = null)
+    {
 
-        if($this->model->find($id) == null){
+        if ($this->model->find($id) == null) {
             throw PageNotFoundException::forPageNotFound();
         }
 
         $this->model->delete($id);
 
-        return redirect()->back()->with('message','Registro eliminado correctamente.');
+        return redirect()->back()->with('message', 'Registro eliminado correctamente.');
     }
 
 
@@ -193,9 +202,8 @@ class CRUDBaseController extends BaseController
     {
         if (!count($this->selectsFk))
             return;
-            
-        $this->selectsData
-        [$this->selectsFk[0]->localField] = new RelationData(
+
+        $this->selectsData[$this->selectsFk[0]->localField] = new RelationData(
             $this->selectsFk[0]->tableName->findAll(),
             $this->selectsFk[0]->fkField,
             $this->selectsFk[0]->fkFieldName
@@ -244,5 +252,26 @@ class CRUDBaseController extends BaseController
         }
 
         return $type;
+    }
+
+    //validaciones
+
+    private function _validateListName(){
+
+        if(count($this->listName) == 0){
+            foreach ($this->eheading as $key => $h) 
+            $this->listName[$h] = $h;
+        }
+
+        if(count($this->listName) !== count($this->eheading))
+            throw new \Exception("La longitud del atributo listName tiene que coincidir con la cantidad de columnas a mostrar.");
+
+        foreach ($this->eheading as $key => $h) {
+            try {
+                $this->listName[$h];
+            } catch (\Throwable $t) {
+                throw new \Exception($t->getMessage());
+            }
+        }
     }
 }

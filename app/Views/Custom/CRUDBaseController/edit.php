@@ -3,7 +3,7 @@
         <?= view("Custom/CRUDBaseController/_form-error"); ?>
         <form action="<?= $baseURL . '/update/' . $record[$primaryId] ?>" method="post">
             <?= view("Custom/CRUDBaseController/_form"); ?>
-            <button type="submit" class="btn btn-success">Editar</button>
+            <button type="submit" class="btn btn-success mt-2">Editar</button>
         </form>
 
     </div>
