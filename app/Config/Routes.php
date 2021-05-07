@@ -94,6 +94,8 @@ $routes->group('lib', function ($routes) {
 $routes->get('/contacto/(:any)', 'Home::contacto/$1', ['as' => 'contacto']);
 
 $routes->get('/image', 'Home::image');
+$routes->get('/facebook', 'Home::facebook');
+
 $routes->get('/image/(:num)/(:any)', 'Home::image/$1/$2', ['as' => 'get_image']);
 $routes->get('/movie/image/(:num)', 'Movie::delete_image/$1', ['as' => 'image_delete']);
 $routes->group('dashboard', function ($routes) {

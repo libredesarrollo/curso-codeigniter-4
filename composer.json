@@ -9,7 +9,10 @@
         "codeigniter4/framework": "^4@rc",
         "paypal/rest-api-sdk-php": "*",
         "stripe/stripe-php": "^7.31",
-        "paypal/paypal-checkout-sdk": "1.0.1"
+        "paypal/paypal-checkout-sdk": "1.0.1",
+        "facebook/graph-sdk": "^5.7",
+        "php-http/curl-client": "^2.2",
+        "guzzlehttp/psr7": "^1.8"
     },
     "require-dev": {
         "mikey179/vfsstream": "1.6.*",

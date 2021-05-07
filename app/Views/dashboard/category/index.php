@@ -4,13 +4,13 @@
     <thead>
         <tr>
             <th>Id</th>
-            <th>Nombre</th>
+            <th><?= lang('Form.name', [], 'en') ?></th>
             <th>Opciones</th>
         </tr>
     </thead>
     <tbody>
 
-        <?php foreach ($categories as $key => $c): ?>
+        <?php foreach ($categories as $key => $c) : ?>
             <tr>
                 <td><?= $c->id ?></td>
                 <td><?= $c->title ?></td>
@@ -24,7 +24,7 @@
 
                 </td>
             </tr>
-        <?php endforeach?>
+        <?php endforeach ?>
 
 
 
