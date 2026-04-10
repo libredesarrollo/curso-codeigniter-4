@@ -1,66 +1,159 @@
-# CodeIgniter 4 Application Starter
+# Curso CodeIgniter 4 — Proyecto de Referencia
 
-## What is CodeIgniter?
+Proyecto de código fuente que acompaña el curso de **CodeIgniter 4** de [Libre Desarrollo](https://desarrollolibre.net). Cubre desde los fundamentos del framework hasta la construcción de un sistema propio de CRUD automatizados, REST API, manejo de imágenes, caché, autenticación y más.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible, and secure. 
-More information can be found at the [official site](http://codeigniter.com).
+## Requisitos
 
-This repository holds a composer-installable app starter.
-It has been built from the 
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- PHP >= 7.4
+- Composer
+- MySQL / MariaDB
+- Servidor web (Apache / Nginx) o PHP built-in server
 
-**This is pre-release code and should not be used in production sites.**
+## Instalación
 
-More information about the plans for version 4 can be found in [the announcement](http://forum.codeigniter.com/thread-62615.html) on the forums.
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/libredesarrollo/curso-codeigniter-4
+cd curso-codeigniter-4
 
-The user guide corresponding to this version of the framework can be found
-[here](https://codeigniter4.github.io/userguide/). 
+# 2. Instalar dependencias
+composer install
 
-## Installation & updates
+# 3. Copiar y configurar el entorno
+cp env .env
+# Editar .env con tus credenciales de base de datos
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+# 4. Ejecutar migraciones
+php spark migrate
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+# 5. Ejecutar seeders (datos de prueba)
+php spark db:seed MovieSeeder
 
-## Setup
+# 6. Levantar servidor de desarrollo
+php spark serve
+```
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+La aplicación estará disponible en `http://localhost:8080`.
 
-## Important Change with index.php
+## Estructura del Proyecto
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+```
+app/
+├── Controllers/
+│   ├── CRUDBaseController.php    ← Controlador base del sistema de CRUD automatizado
+│   ├── CategoryAutoCRUD.php      ← Ejemplo de CRUD automático para películas
+│   ├── Category.php              ← CRUD manual de categorías
+│   ├── Movie.php                 ← CRUD manual de películas
+│   ├── MyLibraries.php           ← Demos de librerías del framework
+│   ├── ImageManipulation.php     ← Manipulación de imágenes
+│   ├── RestMovie.php             ← API REST para películas
+│   └── MyRestApi.php             ← Cliente cURL para APIs externas
+├── Models/
+│   ├── MovieModel.php
+│   └── CategoryModel.php
+├── Views/
+│   ├── Custom/
+│   │   └── CRUDBaseController/   ← Vistas del sistema CRUD automatizado
+│   │       ├── index.php         ← Listado con tabla dinámica
+│   │       ├── edit.php          ← Formulario de edición
+│   │       ├── new.php           ← Formulario de creación
+│   │       └── _form.php         ← Partial compartido de campos
+│   └── dashboard/
+│       └── templates/            ← Header y footer del dashboard
+└── Config/
+    ├── Routes.php
+    └── Validation.php
+```
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+## Sistema de CRUD Automatizado
 
-**Please** read the user guide for a better explanation of how CI4 works!
-The user guide updating and deployment is a bit awkward at the moment, but we are working on it!
+El componente más destacado del proyecto es `CRUDBaseController`, un controlador genérico que automatiza la construcción de CRUDs completos. Para crear un CRUD funcional en segundos:
 
-## Repository Management
+```php
+class CategoryAutoCRUD extends CRUDBaseController
+{
+    public function __construct()
+    {
+        $db = \Config\Database::connect();
 
-We use Github issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+        // 1. Definir el modelo (para escrituras y paginación)
+        $this->setModel(new MovieModel());
 
-This repository is a "distribution" one, built by our release preparation script. 
-Problems with it can be raised on our forum, or as issues in the main repository.
+        // 2. Definir la consulta (para el listado y metadata de columnas)
+        $query = $db->query('SELECT * FROM movies');
+        $this->setQuery($query);
 
-## Server Requirements
+        // 3. Labels personalizados para la tabla y formularios
+        $this->listName = [
+            'id'          => 'Id',
+            'category_id' => 'Categoría',
+            'title'       => 'Título',
+            'description' => 'Descripción',
+            'price'       => 'Precio'
+        ];
 
-PHP version 7.2 or higher is required, with the following extensions installed: 
+        // 4. Activar paginación (opcional)
+        $this->paginated = true;
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+        // 5. Relaciones foráneas para campos select (opcional)
+        $this->setRelationOneToMany('category_id', new CategoryModel(), 'id', 'title');
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+        // 6. Nombre del grupo de validaciones (opcional)
+        $this->nameValidation = "movies";
 
-- json (enabled by default - don't turn it off)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php)
-- xml (enabled by default - don't turn it off)
+        // 7. Cargar header y footer del layout
+        $this->HTMLheader = view("dashboard/templates/header", ['title' => "CRUD Movie"]);
+        $this->HTMLfooter = view("dashboard/templates/footer");
+    }
+}
+```
+
+### Características del sistema CRUD
+
+| Característica | Descripción |
+|---|---|
+| Listado automático | Genera la tabla HTML a partir de la consulta SQL |
+| Tipado de campos | Detecta automáticamente si un campo debe ser `text`, `number` o `textarea` |
+| Relaciones foráneas | Genera `<select>` automáticos para campos FK |
+| Selección por defecto | En edición, pre-selecciona la opción actual del select |
+| Campo ID oculto | El campo primario se oculta automáticamente en formularios |
+| Paginación | Activable con `$paginated = true` |
+| Labels personalizados | Configurables con el array `$listName` |
+| Validaciones | Soporta grupos de validación de CodeIgniter 4 |
+| Modal de confirmación | Modal de Bootstrap para confirmar eliminaciones |
+| Valor anterior | Usa `old()` para recuperar valores tras fallo de validación |
+
+### Rutas requeridas
+
+Registra el controlador con rutas de recursos en `app/Config/Routes.php`:
+
+```php
+$routes->resource('categoryautocrud', ['controller' => 'CategoryAutoCRUD']);
+```
+
+## Temas cubiertos en el curso
+
+- Peticiones HTTP con cURL (GET, POST, PUT, DELETE)
+- Detección del User Agent (dispositivo, navegador, robot)
+- Envío de emails con SMTP y Mailtrap
+- Encriptación de datos con OpenSSL
+- Clase `Time` para fechas y zonas horarias
+- Manipulación de URIs
+- Clase `File` y operaciones con archivos
+- Procesamiento de imágenes (fit, crop, quality, rotate, resize)
+- Caché de páginas y caché de datos
+- Configuraciones personalizadas con `BaseConfig`
+- Sistema de logs
+- Internacionalización (i18n) y detección de idioma
+- El objeto Request y sus métodos
+- Transacciones de base de datos
+- Metadata de base de datos
+- Métodos PUT/PATCH/DELETE en formularios HTML
+- Helpers (array, filesystem, number, text, url)
+- **Sistema propio de CRUD automatizados** (sección principal)
+- API REST con CodeIgniter 4
+- Autenticación y middleware
+
+## Licencia
+
+MIT — Ver archivo [LICENSE](LICENSE) para más detalles.
